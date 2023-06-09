@@ -9,7 +9,7 @@ class LogParserGUI:
 
         # 设置网格布局权重，使得组件可以自适应窗口大小
         self.root.grid_rowconfigure(1, weight=1)
-        self.root.grid_columnconfigure(1, weight=1)
+        self.root.grid_columnconfigure(0, weight=1)
 
         self.recognizer_var = tk.StringVar()
         self.expand_button_var = tk.StringVar(value="▼")
@@ -33,20 +33,21 @@ class LogParserGUI:
         expand_button = tk.Button(self.root, textvariable=self.expand_button_var, command=self.toggle_log_content)
         expand_button.grid(row=1, column=0, padx=10, pady=10)
 
-        log_content_text = tk.Text(self.root, height=1)
+        log_content_text = tk.Text(self.root, height=2)
         log_content_text.grid(row=1, column=1, columnspan=2, padx=10, pady=10, sticky="nsew")
         self.log_content_text = log_content_text
 
         add_log_button = tk.Button(self.root, text="增加日志", command=self.add_log_window)
-        add_log_button.grid(row=1, column=2, padx=10, pady=10)
+        add_log_button.grid(row=1, column=3, padx=10, pady=10)
 
         # 第四行：提取日志字段按钮
         extract_button = tk.Button(self.root, text="提取日志字段", command=self.extract_log_fields)
-        extract_button.grid(row=3, column=0, columnspan=3, padx=10, pady=10)
+        extract_button.grid(row=2, column=1,  padx=10, pady=10)
 
         # 设置网格布局权重，使得日志内容文本框可以自动扩展
         self.root.grid_rowconfigure(1, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
+
 
     def toggle_log_content(self):
         if self.log_content_text.cget("height") == 1:
@@ -102,19 +103,28 @@ class LogParserGUI:
         self.display_extracted_fields()
 
     def display_extracted_fields(self):
-        for widget in self.root.grid_slaves():
-            if widget.grid_info()["row"] > 3:
-                widget.grid_forget()
 
         row_index = 4
+        col_index = 0
+        padx_value = 1
+
+        frame = tk.Frame(self.root)
+        frame.grid(row=4, column=0, columnspan=5, padx=10, pady=20)
+
+
         for key, value in self.extracted_fields.items():
-            key_button = tk.Button(self.root, text=key, fg="red", command=lambda k=key: self.on_key_click(k))
-            key_button.grid(row=row_index, column=0, padx=10, pady=5, sticky="w")
+            # key_button = tk.Button(self.root, text=key, bg="lightblue", command=lambda k=key: self.on_key_click(k))
+            # key_button.grid(row=row_index, column=col_index, padx=padx_value, pady=5, sticky="w")
+            key_button = tk.Button(frame, text=key, bg="lightblue", command=lambda k=key: self.on_key_click(k))
+            key_button.pack(side=tk.LEFT,  padx=padx_value, pady=20)
 
-            value_button = tk.Button(self.root, text=value, fg="blue", command=lambda v=value: self.on_value_click(v))
-            value_button.grid(row=row_index, column=1, padx=10, pady=5, sticky="w")
+            # value_button = tk.Button(self.root, text=value, bg="lightgray", command=lambda v=value: self.on_value_click(v))
+            # value_button.grid(row=row_index, column=col_index+1, padx=padx_value+1, pady=5, sticky="w")
+            value_button = tk.Button(frame, text=value, bg="lightgray", command=lambda v=value: self.on_value_click(v))
+            value_button.pack(side=tk.LEFT, padx=padx_value, pady=20)
 
-            row_index += 1
+            # row_index += 1
+            # col_index += 2
 
     def on_key_click(self, key):
         messagebox.showinfo("Key", key)
