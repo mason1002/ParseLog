@@ -38,7 +38,7 @@ class LogParserGUI:
         self.log_content_text = log_content_text
 
         add_log_button = tk.Button(self.root, text="增加日志", command=self.add_log_window)
-        add_log_button.grid(row=2, column=0, padx=10, pady=10)
+        add_log_button.grid(row=1, column=2, padx=10, pady=10)
 
         # 第四行：提取日志字段按钮
         extract_button = tk.Button(self.root, text="提取日志字段", command=self.extract_log_fields)
