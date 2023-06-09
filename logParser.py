@@ -9,7 +9,7 @@ class LogParserGUI:
 
         # 设置网格布局权重，使得组件可以自适应窗口大小
         self.root.grid_rowconfigure(1, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
+        self.root.grid_columnconfigure(1, weight=1)
 
         self.recognizer_var = tk.StringVar()
         self.expand_button_var = tk.StringVar(value="▼")
@@ -48,6 +48,8 @@ class LogParserGUI:
         self.root.grid_rowconfigure(1, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
+        self.frame = tk.Frame(self.root)
+        self.frame.grid(row=4, column=0, columnspan=5, padx=10, pady=20)
 
     def toggle_log_content(self):
         if self.log_content_text.cget("height") == 1:
@@ -89,7 +91,7 @@ class LogParserGUI:
         add_log_window.destroy()
 
     def extract_log_fields(self):
-        log_content = self.log_content_text.get("1.0", tk.END).strip()
+        log_content = self.log_content_text.get("1.0", tk.END).strip() #1.0: 第一行第一个字符
         fields = log_content.split(";")
         self.extracted_fields = {}
 
@@ -102,38 +104,45 @@ class LogParserGUI:
 
         self.display_extracted_fields()
 
+        extracted_log = self.extracted_fields
+        print(extracted_log)
+
     def display_extracted_fields(self):
+        # 清除旧的字段显示
+        for widget in self.frame.winfo_children():
+            widget.destroy()
 
-        row_index = 4
-        col_index = 0
         padx_value = 1
-
-        frame = tk.Frame(self.root)
-        frame.grid(row=4, column=0, columnspan=5, padx=10, pady=20)
-
+        row_index = 0
 
         for key, value in self.extracted_fields.items():
-            # key_button = tk.Button(self.root, text=key, bg="lightblue", command=lambda k=key: self.on_key_click(k))
-            # key_button.grid(row=row_index, column=col_index, padx=padx_value, pady=5, sticky="w")
-            key_button = tk.Button(frame, text=key, bg="lightblue", command=lambda k=key: self.on_key_click(k))
-            key_button.pack(side=tk.LEFT,  padx=padx_value, pady=20)
+            key_button = tk.Button(self.frame, text=key, bg="lightblue", command=lambda k=key: self.on_key_click(k))
+            key_button.grid(row=row_index, column=0, padx=padx_value, pady=20)
 
-            # value_button = tk.Button(self.root, text=value, bg="lightgray", command=lambda v=value: self.on_value_click(v))
-            # value_button.grid(row=row_index, column=col_index+1, padx=padx_value+1, pady=5, sticky="w")
-            value_button = tk.Button(frame, text=value, bg="lightgray", command=lambda v=value: self.on_value_click(v))
-            value_button.pack(side=tk.LEFT, padx=padx_value, pady=20)
+            value_button = tk.Button(self.frame, text=value, bg="lightgray", command=lambda v=value: self.on_value_click(v))
+            value_button.grid(row=row_index, column=1, padx=padx_value, pady=20)
 
-            # row_index += 1
-            # col_index += 2
+            row_index += 1
 
     def on_key_click(self, key):
-        messagebox.showinfo("Key", key)
+        new_key = tk.simpledialog.askstring("Modify Key", "Enter a new value for the key:", initialvalue=key)
+        if new_key is not None:
+            if new_key != key:
+                value = self.extracted_fields[key]
+                del self.extracted_fields[key]
+                self.extracted_fields[new_key] = value
+                self.display_extracted_fields()
 
     def on_value_click(self, value):
-        messagebox.showinfo("Value", value)
+        new_value = tk.simpledialog.askstring("Modify Value", "Enter a new value for the value:", initialvalue=value)
+        if new_value is not None:
+            if new_value != value:
+                for key, val in self.extracted_fields.items():
+                    if val == value:
+                        self.extracted_fields[key] = new_value
+                self.display_extracted_fields()
 
 
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = LogParserGUI(root)
-    root.mainloop()
+root = tk.Tk()
+app = LogParserGUI(root)
+root.mainloop()
