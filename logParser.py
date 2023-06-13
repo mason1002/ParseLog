@@ -26,8 +26,16 @@ class LogParserGUI:
         recognizer_entry = tk.Entry(self.root, textvariable=self.recognizer_var, width=50)
         recognizer_entry.grid(row=0, column=1, padx=10, pady=10)
 
+        # 添加确认按钮
+        confirm_button = tk.Button(self.root, text="确认", command=self.confirm_recognizer)
+        confirm_button.grid(row=0, column=2, padx=10, pady=10)
+
+        # # 获取用户输入的字段值
+        # self.recognizer_value = self.recognizer_var.get()
+        # print(self.recognizer_value)
+
         escape_label = tk.Label(self.root, text="特殊字符需转义")
-        escape_label.grid(row=0, column=2, padx=10, pady=10)
+        escape_label.grid(row=0, column=3, padx=10, pady=10)
 
         # 第二行：展开/合上按钮、日志内容
         expand_button = tk.Button(self.root, textvariable=self.expand_button_var, command=self.toggle_log_content)
@@ -51,6 +59,10 @@ class LogParserGUI:
         self.frame = tk.Frame(self.root)
         self.frame.grid(row=4, column=0, columnspan=5, padx=10, pady=20)
 
+    def confirm_recognizer(self):
+        recognizer_value = self.recognizer_var.get()
+        messagebox.showinfo("确认", f"已确认 Recognizer 值为: {recognizer_value}")
+    
     def toggle_log_content(self):
         if self.log_content_text.cget("height") == 1:
             self.log_content_text.config(height=6)
@@ -117,10 +129,10 @@ class LogParserGUI:
 
         for key, value in self.extracted_fields.items():
             key_button = tk.Button(self.frame, text=key, bg="lightblue", command=lambda k=key: self.on_key_click(k))
-            key_button.grid(row=row_index, column=0, padx=padx_value, pady=20)
+            key_button.grid(row=row_index, column=0, padx=padx_value, pady=1, sticky="w")
 
             value_button = tk.Button(self.frame, text=value, bg="lightgray", command=lambda v=value: self.on_value_click(v))
-            value_button.grid(row=row_index, column=1, padx=padx_value, pady=20)
+            value_button.grid(row=row_index, column=1, padx=padx_value, pady=1, sticky="w")
 
             row_index += 1
 
