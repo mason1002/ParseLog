@@ -7,7 +7,7 @@ class LogParserGUI:
         self.root = root
         self.root.title("Log Parser")
 
-        # 设置网格布局权重，使得组件可以自适应窗口大小
+        # 设置网格布局权重，使得组件可自适应窗口大小
         self.root.grid_rowconfigure(1, weight=1)
         self.root.grid_columnconfigure(1, weight=1)
 
@@ -34,10 +34,10 @@ class LogParserGUI:
         # self.recognizer_value = self.recognizer_var.get()
         # print(self.recognizer_value)
 
-        escape_label = tk.Label(self.root, text="特殊字符需转义")
-        escape_label.grid(row=0, column=3, padx=10, pady=10)
+        recognizer_beizhu = tk.Label(self.root, text="特殊字符需转义")
+        recognizer_beizhu.grid(row=0, column=3, padx=10, pady=10)
 
-        # 第二行：展开/合上按钮、日志内容
+        # 第二行：展开/合上按钮、日志内容,感觉没啥用，以后看情况可以去掉这个按钮
         expand_button = tk.Button(self.root, textvariable=self.expand_button_var, command=self.toggle_log_content)
         expand_button.grid(row=1, column=0, padx=10, pady=10)
 
@@ -48,21 +48,23 @@ class LogParserGUI:
         add_log_button = tk.Button(self.root, text="增加日志", command=self.add_log_window)
         add_log_button.grid(row=1, column=3, padx=10, pady=10)
 
-        # 第四行：提取日志字段按钮
+        # 第三行：提取日志字段按钮
         extract_button = tk.Button(self.root, text="提取日志字段", command=self.extract_log_fields)
         extract_button.grid(row=2, column=1,  padx=10, pady=10)
 
-        # 设置网格布局权重，使得日志内容文本框可以自动扩展
-        self.root.grid_rowconfigure(1, weight=1)
-        self.root.grid_columnconfigure(1, weight=1)
+        # 日志内容文本框自适应窗口
+        # self.root.grid_rowconfigure(1, weight=1)
+        # self.root.grid_columnconfigure(1, weight=1)
 
         self.frame = tk.Frame(self.root)
         self.frame.grid(row=4, column=0, columnspan=5, padx=10, pady=20)
 
+    # Recognizer确认
     def confirm_recognizer(self):
         recognizer_value = self.recognizer_var.get()
         messagebox.showinfo("确认", f"已确认 Recognizer 值为: {recognizer_value}")
     
+    # TODO 展开合上功能要用在解析出来的字段，而不是展开日志文本框
     def toggle_log_content(self):
         if self.log_content_text.cget("height") == 1:
             self.log_content_text.config(height=6)
@@ -70,7 +72,8 @@ class LogParserGUI:
         else:
             self.log_content_text.config(height=1)
             self.expand_button_var.set("▲")
-
+    
+    # 添加日志弹出窗口
     def add_log_window(self):
         add_log_window = tk.Toplevel(self.root)
         add_log_window.title("Add Log")
@@ -102,6 +105,7 @@ class LogParserGUI:
         self.log_content_text.insert(tk.END, log_content + "\n")
         add_log_window.destroy()
 
+    # 解析日志字段
     def extract_log_fields(self):
         log_content = self.log_content_text.get("1.0", tk.END).strip() #1.0: 第一行第一个字符
         fields = log_content.split(";")
@@ -116,9 +120,11 @@ class LogParserGUI:
 
         self.display_extracted_fields()
 
+        # test print log
         extracted_log = self.extracted_fields
         print(extracted_log)
 
+    # 显示解析出来的日志字段，key/value用不同颜色button块展示
     def display_extracted_fields(self):
         # 清除旧的字段显示
         for widget in self.frame.winfo_children():
@@ -135,9 +141,10 @@ class LogParserGUI:
             value_button.grid(row=row_index, column=1, padx=padx_value, pady=1, sticky="w")
 
             row_index += 1
-
+    
+    # 点击修改解析出来的key、value的值
     def on_key_click(self, key):
-        new_key = tk.simpledialog.askstring("Modify Key", "Enter a new value for the key:", initialvalue=key)
+        new_key = tk.simpledialog.askstring("修改键", "请输入新的键值", initialvalue=key)
         if new_key is not None:
             if new_key != key:
                 value = self.extracted_fields[key]
@@ -146,7 +153,7 @@ class LogParserGUI:
                 self.display_extracted_fields()
 
     def on_value_click(self, value):
-        new_value = tk.simpledialog.askstring("Modify Value", "Enter a new value for the value:", initialvalue=value)
+        new_value = tk.simpledialog.askstring("修改值", "请输入新的值", initialvalue=value)
         if new_value is not None:
             if new_value != value:
                 for key, val in self.extracted_fields.items():
