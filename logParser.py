@@ -63,7 +63,7 @@ class LogParserGUI:
     def confirm_recognizer(self):
         recognizer_value = self.recognizer_var.get()
         messagebox.showinfo("确认", f"已确认 Recognizer 值为: {recognizer_value}")
-        print("Recognizer: " +recognizer_value)
+        print("Recognizer: " + recognizer_value)
     
     # TODO 展开合上功能要用在解析出来的字段，而不是展开日志文本框
     def toggle_log_content(self):
