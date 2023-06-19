@@ -136,6 +136,12 @@ class LogParserGUI:
         var_pattern = pattern_text.get("1.0", tk.END).strip()
         self.regex_patterns.append((var_name, var_pattern))
         frame.confirmed = True  # 将confirmed属性设置为True
+
+        # 设置文本框、确认按钮为不可编辑
+        name_text.configure(state="disabled", bg="gray")
+        pattern_text.configure(state="disabled", bg="gray")
+        # frame.winfo_children()[3].configure(state="disabled", bg="gray")
+        
         print("Regex Patterns:", self.regex_patterns)
     
     def parse_log(self):
