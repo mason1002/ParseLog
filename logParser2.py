@@ -100,17 +100,22 @@ class LogParserGUI:
 
     def add_regex_pattern(self):
         frame_var_first = tk.Frame(self.frame_var)
+        frame_var_first.confirmed = False  # 添加confirmed属性并初始化为False
         frame_var_first.pack(side="top", pady=2, fill=tk.X)
+
         var_label_name = tk.Label(frame_var_first, text="variable name")
         var_label_name.pack(side="left", padx=1, pady=1)
         var_name_text = tk.Text(frame_var_first, height=1, width=10)
         var_name_text.pack(side="left", padx=2)
+
         var_label_pattern = tk.Label(frame_var_first, text="pattern")
         var_label_pattern.pack(side="left", padx=1, pady=1)
         var_pattern_text = tk.Text(frame_var_first, height=1, width=20)
         var_pattern_text.pack(side="left", padx=2)
-        var_confirm_button = tk.Button(frame_var_first, text="确认", command=lambda name=var_name_text, pattern=var_pattern_text: self.confirm_regex_pattern(name, pattern))
+
+        var_confirm_button = tk.Button(frame_var_first, text="确认", command=lambda frame=frame_var_first, name=var_name_text, pattern=var_pattern_text: self.confirm_regex_pattern(frame, name, pattern))
         var_confirm_button.pack(side="left", padx=2)
+
         var_pattern_del = tk.Button(frame_var_first, text="-", command=lambda frame=frame_var_first: self.del_regex_pattern(frame))
         var_pattern_del.pack(side="left", padx=2)
 
@@ -123,10 +128,14 @@ class LogParserGUI:
         frame.destroy()
         print("Regex Patterns:", self.regex_patterns)
 
-    def confirm_regex_pattern(self, name_text, pattern_text):
+    def confirm_regex_pattern(self, frame, name_text, pattern_text):
+        if frame.confirmed:
+            return
+
         var_name = name_text.get("1.0", tk.END).strip()
         var_pattern = pattern_text.get("1.0", tk.END).strip()
         self.regex_patterns.append((var_name, var_pattern))
+        frame.confirmed = True  # 将confirmed属性设置为True
         print("Regex Patterns:", self.regex_patterns)
     
     def parse_log(self):
