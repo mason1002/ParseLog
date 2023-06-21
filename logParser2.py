@@ -176,7 +176,7 @@ class LogParserGUI:
         self.display_parsed_log()
 
     def display_parsed_log(self):
-        # 清除旧的字段显示
+        # 清除旧的
         for widget in self.extracted_fields_frame.winfo_children():
             widget.destroy()
 
