@@ -150,7 +150,7 @@ class LogParserGUI:
         var_name = name_text.get("1.0", tk.END).strip()
         var_pattern = pattern_text.get("1.0", tk.END).strip()
         self.regex_patterns.append((var_name, var_pattern))
-        frame.confirmed = True  # 将confirmed属性设置为True
+        frame.confirmed = True  # 打个标签
 
         # 设置文本框、确认按钮为不可编辑
         name_text.configure(state="disabled", bg="gray")
@@ -163,7 +163,7 @@ class LogParserGUI:
         log_text = self.log_content_text.get("1.0", tk.END).strip()
         log_lines = log_text.split(";")
 
-        # 清除旧的字段数据
+        # 初始化
         self.extracted_fields = []
 
         for line in log_lines:
