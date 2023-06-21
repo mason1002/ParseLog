@@ -3,6 +3,6 @@ RIS_QIZHI.xml
 test_log.txt
 logParser3_tmp.py
 logParser3.py
-pattern.py
+# pattern.py
 event_attributes.json
 event_attributes.py
