@@ -6,3 +6,5 @@ logParser3.py
 # pattern.py
 event_attributes.json
 event_attributes.py
+*pycache*/*
+
