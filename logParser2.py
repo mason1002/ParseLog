@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import filedialog, messagebox
+from tkinter import ttk
+from pattern import RegexPattern,WordPattern,AttriSetting,LogParserOneFormat,LogParser
 
 
 class LogParserGUI:
@@ -13,11 +15,12 @@ class LogParserGUI:
         self.extracted_fields = []
         self.var_check_enable = tk.StringVar(value="0")
         self.regex_patterns = []
-
+        self.regex_pattern_names = ["gPatSyslogPRI","gPatMesgBody","gPatMon","gPatMonNum","gPatDay","gPatTime","gPatTimeMSec","gPatMSec","gPatTimeZone","gPatYear","gPatIpAddr","gPatInt","gPatStr"]
+        self.logParser = LogParser()
         # 显示提取的日志字段按钮的frame
         self.extracted_fields_frame = tk.Frame(self.root)
         self.extracted_fields_frame.pack(side=tk.BOTTOM, pady=10)
-
+        
         self.frame_recog = tk.Frame(self.root)
         self.var_frame_all = tk.Frame(self.root)
         self.frame_var = tk.Frame(self.var_frame_all)
@@ -62,7 +65,7 @@ class LogParserGUI:
         log_frame_content = tk.Frame(self.root)
         log_frame_content.pack(side="top", pady=2, anchor="w")
         log_content_text = tk.Text(log_frame_content, height=3)
-        log_content_text.pack(side="left", pady=2)
+        log_content_text.pack(side="left", padx=2,pady=2)
         self.log_content_text = log_content_text
         log_content_parse = tk.Button(
             log_frame_content, text="parse", command=self.parse_log)
@@ -140,6 +143,7 @@ class LogParserGUI:
         var_name = var_name_text.get("1.0", tk.END).strip()
         var_pattern = var_pattern_text.get("1.0", tk.END).strip()
         self.regex_patterns.remove((var_name, var_pattern))
+        self.regex_pattern_names.remove(var_name)
         frame.destroy()
         print("Regex Patterns:", self.regex_patterns)
 
@@ -150,7 +154,8 @@ class LogParserGUI:
         var_name = name_text.get("1.0", tk.END).strip()
         var_pattern = pattern_text.get("1.0", tk.END).strip()
         self.regex_patterns.append((var_name, var_pattern))
-        frame.confirmed = True  # 打个标签
+        self.regex_pattern_names.append(var_name)
+        frame.confirmed = True  # 将confirmed属性设置为True
 
         # 设置文本框、确认按钮为不可编辑
         name_text.configure(state="disabled", bg="gray")
@@ -161,37 +166,70 @@ class LogParserGUI:
 
     def parse_log(self):
         log_text = self.log_content_text.get("1.0", tk.END).strip()
-        log_lines = log_text.split(";")
+        #log_lines = log_text.split(";")
+        log_format = LogParserOneFormat(log_text)
+        word_pattern = WordPattern(log_text)
+        pat_list = word_pattern.split()
+        log_format.word_patterns = pat_list
+        # 清除旧的字段数据
+        #self.extracted_fields = []
 
-        # 初始化
-        self.extracted_fields = []
+        self.display_parsed_log(pat_list)
 
-        for line in log_lines:
-            line = line.strip()
-            if line:
-                self.extracted_fields.append(line)
-            # print(line)
-        print(self.extracted_fields)
-
-        self.display_parsed_log()
-
-    def display_parsed_log(self):
-        # 清除旧的
+    def display_parsed_log(self,pat_list):
+        # 清除旧的字段显示
         for widget in self.extracted_fields_frame.winfo_children():
             widget.destroy()
-
+        
         row_index = 0
 
-        for field in self.extracted_fields:
-            field_button = tk.Button(self.extracted_fields_frame, text=field,
-                                     bg="lightblue", command=lambda f=field: self.on_field_click(f))
+        for word_pat in pat_list:
+            if word_pat.is_static:
+                backgroud = "gray"
+            else:
+                backgroud = "lightblue"
+            field_button = tk.Button(self.extracted_fields_frame, text=word_pat.str,
+                                     bg=backgroud, command=lambda p=word_pat:self.on_field_click(p))
             field_button.pack(side=tk.LEFT, padx=5, pady=5)
 
             row_index += 1
 
-    def on_field_click(self, field):
-        print(field)
+    def on_field_click(self, word_pat):
+        top = tk.Toplevel()
+        word_pat.tk_static_value = tk.BooleanVar(value=word_pat.is_static)
+        word_pat.tk_regex_choose_value = tk.IntVar()
+        word_pat.tk_regex_value = tk.StringVar()
+        #static_value.set("1")
+        static_check = tk.Checkbutton(top,text="static",variable=word_pat.tk_static_value,command=lambda p=word_pat:self.static_check_command(p))
+        #static_check.select()
+        static_check.pack(side="top", anchor='w', pady=2, padx=2)
+        word_pat.tk_frame = tk.Frame(top)
+        regex_combobox = ttk.Combobox(word_pat.tk_frame,values=self.regex_pattern_names)
+        regex_entry = ttk.Entry(word_pat.tk_frame,textvariable=word_pat.tk_regex_value)
+        if word_pat.regex_pattern != '':
+            word_pat.tk_regex_choose_value = tk.IntVar(value=1)
+            regex_combobox.current(self.regex_pattern_names.index(word_pat.regex_pattern))
+        elif word_pat.regex != '':
+            word_pat.tk_regex_choose_value.set(2)
+            word_pat.tk_regex_value.set(value=word_pat.regex)
+        else:
+            word_pat.tk_regex_choose_value.set(1)
 
+        
+        regex_pattern_choose = tk.Radiobutton(word_pat.tk_frame, text="regex pattern",variable=word_pat.tk_regex_choose_value, value=1, command=lambda:self.regex_choose())
+        regex_choose = tk.Radiobutton(word_pat.tk_frame, text="regex",variable=word_pat.tk_regex_choose_value, value=2, command=lambda:self.regex_choose())
+        if not word_pat.is_static:
+            word_pat.tk_frame.pack(side="top",pady=2, padx=2)
+            regex_pattern_choose.pack(side="top", anchor='w',pady=2, padx=2)
+            regex_choose.pack(side="top", anchor='w',pady=2, padx=2)
+            regex_combobox.pack(side="top", anchor='w',pady=2, padx=2)
+
+
+    def static_check_command(self, word_pat):
+        #word_pat.tk_frame
+        return
+    def regex_choose(self):
+        return
     def add_attribute(self):
         return
 
